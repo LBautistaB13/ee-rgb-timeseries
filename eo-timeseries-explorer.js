@@ -56,24 +56,24 @@ var rgbUrl = ui.url.get('rgb', initRgb);
 ui.url.set('rgb', rgbUrl);
 
 // Init date
-var initYear = 2020;
+var initYear = 2018;
 var initYearUrl = ui.url.get('initYear', initYear);
 ui.url.set('initYear', initYearUrl);
 
-var initMonth = 1;
+var initMonth = 8;
 var initMonthUrl = ui.url.get('initMonth', initMonth);
 ui.url.set('initMonth', initMonthUrl);
 
-var initDay = 1;
+var initDay = 12;
 var initDayUrl = ui.url.get('initDay', initDay);
 ui.url.set('initDay', initDayUrl);
 
 // Last date
-var lastYear = 2020;
+var lastYear = 2019;
 var lastYearUrl = ui.url.get('lastYear', lastYear);
 ui.url.set('lastYear', lastYearUrl);
 
-var lastMonth = 12;
+var lastMonth = 2;
 var lastMonthUrl = ui.url.get('lastMonth', lastMonth);
 ui.url.set('lastMonth', lastMonthUrl);
 
@@ -90,6 +90,9 @@ var initChipWidth = 2;
 var chipWidthUrl = ui.url.get('chipwidth', initChipWidth);
 ui.url.set('chipwidth', chipWidthUrl);
 
+var imgid = '20190212T142031_20190212T143214_T19FDF';
+var imgidUrl = ui.url.get('imgid', imgid);
+ui.url.set('imgid', imgidUrl);
 
 
 // #############################################################################
@@ -535,8 +538,9 @@ function getS2SrCldCol(aoi, startDate, endDate, cloudthresh, id) {
   var s2SrCol = ee.ImageCollection(id)
     .filterBounds(aoi)
     .filterDate(startDate, endDate)
-    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', cloudthresh));
-
+    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', cloudthresh))
+    .merge(ee.Image("COPERNICUS/S2/" + ui.url.get("imgid")));
+      
   return s2SrCol.map(addBandsS2).map(addDate);
 }
 
@@ -618,8 +622,7 @@ function renderGraphics(coords) {
   var datasetId = sensorInfo[sensor]['id'];
   var endDate = new Date(ui.url.get("lastYear"),  ui.url.get("lastMonth"),  ui.url.get("lastDay"));
   var startDate = ee.Date.fromYMD(ui.url.get("initYear"),  ui.url.get("initMonth"),  ui.url.get("initDay"));
-  print(endDate)
-  print(startDate)
+  
   // Build the collection.
   var col;
   if(sensor == 'Sentinel-2 SR' | sensor == 'Sentinel-2 TOA') {
