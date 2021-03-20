@@ -55,9 +55,32 @@ var initRgb = 'SWIR1/NIR/GREEN';
 var rgbUrl = ui.url.get('rgb', initRgb);
 ui.url.set('rgb', rgbUrl);
 
-var initDuration = 12;
-var durationUrl = ui.url.get('duration', initDuration);
-ui.url.set('duration', durationUrl);
+// Init date
+var initYear = 2020;
+var initYearUrl = ui.url.get('initYear', initYear);
+ui.url.set('initYear', initYearUrl);
+
+var initMonth = 1;
+var initMonthUrl = ui.url.get('initMonth', initMonth);
+ui.url.set('initMonth', initMonthUrl);
+
+var initDay = 1;
+var initDayUrl = ui.url.get('initDay', initDay);
+ui.url.set('initDay', initDayUrl);
+
+// Last date
+var lastYear = 2020;
+var lastYearUrl = ui.url.get('lastYear', lastYear);
+ui.url.set('lastYear', lastYearUrl);
+
+var lastMonth = 12;
+var lastMonthUrl = ui.url.get('lastMonth', lastMonth);
+ui.url.set('lastMonth', lastMonthUrl);
+
+var lastDay = 12;
+var lastDayUrl = ui.url.get('lastDay', lastDay);
+ui.url.set('lastDay', lastDayUrl);
+
 
 var initCloud = 30;
 var cloudUrl = ui.url.get('cloud', initCloud);
@@ -167,16 +190,6 @@ var rgbSelect = ui.Select({
   value: ui.url.get('rgb'), style: {stretch: 'horizontal'}
 });
 var rgbPanel = ui.Panel([rgbLabel, rgbSelect], null, {stretch: 'horizontal'});
-
-// Duration.
-var durationLabel = ui.Label(
-  {value: 'Duration (months prior)', style: headerFont});
-var durationSlider = ui.Slider({
-  min: 1, max: 24 , value: parseInt(ui.url.get('duration')),
-  step: 1, style: {stretch: 'horizontal'}
-});
-var durationPanel = ui.Panel(
-  [durationLabel, durationSlider], null, {stretch: 'horizontal'});
 
 // Cloud threshold.
 var cloudLabel = ui.Label(
@@ -603,10 +616,10 @@ function renderGraphics(coords) {
 
   var cloudThresh = cloudSlider.getValue();
   var datasetId = sensorInfo[sensor]['id'];
-  var endDate = new Date();
-  var startDate = ee.Date(endDate)
-    .advance(-parseInt(durationSlider.getValue()), 'months');
-
+  var endDate = new Date(ui.url.get("lastYear"),  ui.url.get("lastMonth"),  ui.url.get("lastDay"));
+  var startDate = ee.Date.fromYMD(ui.url.get("initYear"),  ui.url.get("initMonth"),  ui.url.get("initDay"));
+  print(endDate)
+  print(startDate)
   // Build the collection.
   var col;
   if(sensor == 'Sentinel-2 SR' | sensor == 'Sentinel-2 TOA') {
@@ -657,7 +670,6 @@ function setParams() {
   ui.url.set('sensor', sensorSelect.getValue());
   ui.url.set('index', indexSelect.getValue());
   ui.url.set('rgb', rgbSelect.getValue());
-  ui.url.set('duration', durationSlider.getValue());
   ui.url.set('cloud', cloudSlider.getValue());
   ui.url.set('chipwidth', regionWidthSlider.getValue());
 }   
@@ -737,7 +749,6 @@ controlElements.add(optionsLabel);
 controlElements.add(sensorPanel);
 controlElements.add(indexPanel);
 controlElements.add(rgbPanel);
-controlElements.add(durationPanel);
 controlElements.add(cloudPanel);
 controlElements.add(regionWidthPanel);
 controlElements.add(submitButton);
@@ -754,7 +765,6 @@ controlButton.onClick(controlButtonHandler);
 sensorSelect.onChange(optionChange);
 rgbSelect.onChange(optionChange);
 indexSelect.onChange(optionChange);
-durationSlider.onChange(optionChange);
 cloudSlider.onChange(optionChange);
 regionWidthSlider.onChange(optionChange);
 submitButton.onClick(handleSubmitClick);
