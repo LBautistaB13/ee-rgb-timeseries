@@ -154,13 +154,14 @@ var aboutLabel = ui.Label(
   'datasets and locations for images collected within two years of today. Time series ' +
   'point colors are defined by RGB assignment to selected bands where ' +
   'intensity is based on the area-weighted mean pixel value within a radius ' +
-  'around the clicked point in the map (30 m for Sentinel-2, 45 m for Landsat-8).',
+  'around the clicked point in the map (100 m for Sentinel-2, 45 m for Landsat-8).' +
+  'Created by Justin Braaten adapted for CloudSEN12 by @csaybar and @LeslyAracelly',
   infoFont);
 
 var appCodeLink = ui.Label({
   value: 'App source code',
   style: {fontSize: '11px', color: '#505050', margin: '-4px 8px 0px 8px'}, 
-  targetUrl: 'https://github.com/jdbcode/ee-rgb-timeseries/blob/main/eo-timeseries-explorer.js'
+  targetUrl: 'https://github.com/LBautistaB13/ee-rgb-timeseries/blob/main/eo-timeseries-explorer.js'
 });
 
 
@@ -225,7 +226,9 @@ var waitMsgImgPanel = ui.Label({
 });
 
 // Panel to hold the chart.
-var chartPanel = ui.Panel({style: {height: '25%'}});
+var chartPanel = ui.Panel();
+var chartPanel2 = ui.Panel();
+var chartPanel3 = ui.Panel();
 
 // Holder for image cards.
 var imgCardPanel = ui.Panel({
@@ -237,12 +240,27 @@ var imgCardPanel = ui.Panel({
 var map = ui.Map();
 
 // Map/chart panel
-var mapChartSplitPanel = ui.Panel(ui.SplitPanel({
-  firstPanel: map, //
-  secondPanel: chartPanel,
+var mapChartSplitPanel1 = ui.Panel(ui.SplitPanel({
+  firstPanel: chartPanel, //
+  secondPanel: chartPanel2,
+  orientation: 'vertical'
+}));
+
+
+var mapChartSplitPanel2 = ui.Panel(ui.SplitPanel({
+  firstPanel: chartPanel3, //
+  secondPanel: map,
   orientation: 'vertical',
   wipe: false,
 }));
+
+var mapChartSplitPanel = ui.Panel(ui.SplitPanel({
+  firstPanel: mapChartSplitPanel1, //
+  secondPanel: mapChartSplitPanel2,
+  orientation: 'vertical',
+  wipe: false,
+}));
+
 
 // Map/chart and image card panel
 var splitPanel = ui.SplitPanel(mapChartSplitPanel, imgCardPanel);
@@ -268,7 +286,7 @@ var CLICKED = false;
 // Set region reduction and chart params.
 var OPTIONAL_PARAMS = {
   reducer: ee.Reducer.mean(),
-  scale: 20,
+  scale: 100,
   crs: 'EPSG:4326',
   chartParams: {
     pointSize: 11,
@@ -368,7 +386,7 @@ var sensorInfo = {
   'Sentinel-2 SR': {
     id: 'COPERNICUS/S2_SR',
     scale: 20,
-    aoiRadius: 30,
+    aoiRadius: 100,
     index: {
       NBR: 'NBR',
       NDVI: 'NDVI',
@@ -636,14 +654,63 @@ function renderGraphics(coords) {
   // Display the image chip time series. 
   displayBrowseImg(col, aoiBox, aoiCircle);
 
+
+  // Render the time series chart.
+  // Blue
   OPTIONAL_PARAMS['chartParams']['vAxis']['title'] = indexSelect.getValue();
   OPTIONAL_PARAMS['scale'] = sensorInfo[sensorSelect.getValue()]['scale'];
 
-  // Render the time series chart.
   rgbTs.rgbTimeSeriesChart(col, aoiCircle,
     sensorInfo[sensorSelect.getValue()]['index'][indexSelect.getValue()],
     sensorInfo[sensorSelect.getValue()]['rgb'][rgbSelect.getValue()],
     chartPanel, OPTIONAL_PARAMS);
+
+  // NDVI
+  var OPTIONAL_PARAMS2 = {
+  reducer: ee.Reducer.mean(),
+  scale: 20,
+  crs: 'EPSG:4326',
+  chartParams: {
+    pointSize: 11,
+    legend: {position: 'none'},
+    hAxis: {title: 'Date', titleTextStyle: {italic: false, bold: true}},
+    vAxis: {
+      title: "NDVI",
+      titleTextStyle: {italic: false, bold: true}
+    },
+    explorer: {axis: 'horizontal'}
+    }
+  };
+
+  rgbTs.rgbTimeSeriesChart(col, aoiCircle,
+    "NDVI",
+    sensorInfo[sensorSelect.getValue()]['rgb'][rgbSelect.getValue()],
+    chartPanel2, OPTIONAL_PARAMS2);
+  
+  
+  // SWIR1
+  var OPTIONAL_PARAMS3 = {
+  reducer: ee.Reducer.mean(),
+  scale: 20,
+  crs: 'EPSG:4326',
+  chartParams: {
+    pointSize: 11,
+    legend: {position: 'none'},
+    hAxis: {title: 'Date', titleTextStyle: {italic: false, bold: true}},
+    vAxis: {
+      title: "SWIR1",
+      titleTextStyle: {italic: false, bold: true}
+    },
+    explorer: {axis: 'horizontal'}
+    }
+  };
+  
+  
+  rgbTs.rgbTimeSeriesChart(col, aoiCircle,
+    "B11",
+    sensorInfo[sensorSelect.getValue()]['rgb'][rgbSelect.getValue()],
+    chartPanel3, OPTIONAL_PARAMS3);
+    
 }
 
 /**
