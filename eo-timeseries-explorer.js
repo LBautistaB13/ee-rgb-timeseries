@@ -557,7 +557,7 @@ function getS2SrCldCol(aoi, startDate, endDate, cloudthresh, id) {
     .filterBounds(aoi)
     .filterDate(startDate, endDate)
     .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', cloudthresh))
-    .merge(ee.Image("COPERNICUS/S2/" + ui.url.get("imgid")));
+    .merge(ee.Image("COPERNICUS/S2_SR/" + ui.url.get("imgid")));
       
   return s2SrCol.map(addBandsS2).map(addDate);
 }
